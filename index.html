@@ -121,7 +121,7 @@ body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',-apple-system,Blink
 // =====================================================================
 // CONFIG - CHANGE THIS TO YOUR CLOUDFLARE WORKER URL
 // =====================================================================
-const WORKER_URL = 'cs2-radar-relay.ihawkeyes11.workers.dev';
+const WORKER_URL = 'funny-cobra-88.deno.dev';
 // =====================================================================
 
 const WS_URL = 'wss://' + WORKER_URL + '/ws/';
@@ -161,14 +161,14 @@ function loadMap(name) {
     if (md.levels) {
         for (const lv of md.levels) {
             const img = new Image();
-            const fname = lv === 'default' ? name : name + '_' + lv;
+            const fname = lv === 'default' ? name : name + '_lower';
             img.onload = () => { mapImages[name + '_' + lv] = img; };
-            img.src = '/maps/' + fname + '.png';
+            img.src = '/data/' + fname + '/radar.png';
         }
     } else {
         const img = new Image();
         img.onload = () => { mapImages[name] = img; };
-        img.src = '/maps/' + name + '.png';
+        img.src = '/data/' + name + '/radar.png';
     }
 }
 
