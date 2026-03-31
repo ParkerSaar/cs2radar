@@ -151,8 +151,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 </div>
 
 <script>
-const WORKER_URL = 'funny-cobra-88.parkersaar.deno.net';
-const WS_URL = 'wss://' + WORKER_URL + '/ws/';
+const WS_URL = 'ws://216.250.112.68:8080';
 
 const MAP_DATA = {
     de_dust2: { pos_x: -2476, pos_y: 3239, scale: 4.4 },
@@ -177,7 +176,6 @@ let ws = null, sessionCode = '', radarData = null;
 let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragX = 0, dragY = 0, dcX = 0, dcY = 0;
 let canvas, ctx, W, H, currentMap = '', mapImg = null;
 let viewMode = 'map', followTarget = '';
-let uiUpdateTimer = null;
 
 function notify(msg) { const el = document.getElementById('notification'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
 function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -229,6 +227,8 @@ function doLogin() {
 }
 document.getElementById('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
+let pendingData = null;
+
 // WS
 function connectWS() {
     if (ws?.readyState <= 1) ws.close();
@@ -241,7 +241,6 @@ function connectWS() {
         else if (msg.type === 'radar_data') {
             radarData = msg.data;
             if (msg.data?.map && msg.data.map !== currentMap) loadMap(msg.data.map);
-            scheduleUIUpdate();
         }
         else if (msg.type === 'lua_disconnected') notify('Game disconnected');
         else if (msg.type === 'lua_connected') notify('Game connected');
@@ -297,149 +296,62 @@ function getChar(team) {
     return '/characters/' + (team === 2 ? T_CHAR : CT_CHAR) + '.png';
 }
 
-// Store references to player card elements
-const playerCards = new Map(); // name -> {el, data}
-
-function createCard(name, team) {
-    const card = document.createElement('div');
-    card.className = 'player-card';
-    card.innerHTML = `
+function buildCard(p, isLocal) {
+    const dead = p.alive ? '' : ' dead';
+    const local = isLocal ? ' local' : '';
+    const armorIcon = p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar';
+    const weapon = p.weapon || '';
+    const defuser = p.has_defuser ? '<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>' : '';
+    const weaponHtml = (weapon && p.alive) ? `<div class="pc-weapon active"><img src="/icons/${weapon.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>` : '';
+    
+    return `<div class="player-card${dead}${local}">
         <div class="pc-row1">
-            <div class="pc-avatar"><img src="${getChar(team)}"><div class="pc-status alive"></div></div>
+            <div class="pc-avatar"><img src="${getChar(p.team)}"><div class="pc-status ${p.alive?'alive':'dead'}"></div></div>
             <div class="pc-info">
-                <div class="pc-name">${esc(name)}</div>
-                <div class="pc-money">$0</div>
+                <div class="pc-name">${esc(p.name||'Unknown')}</div>
+                <div class="pc-money">$${(p.money||0).toLocaleString()}</div>
                 <div class="pc-bars">
-                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/health.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill health" style="width:100%"></div></div><div class="pc-bar-value">100</div></div>
-                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/kevlar.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:0%"></div></div><div class="pc-bar-value">0</div></div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/health.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill health" style="width:${p.health||0}%"></div></div><div class="pc-bar-value">${p.health||0}</div></div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/${armorIcon}.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:${p.armor||0}%"></div></div><div class="pc-bar-value">${p.armor||0}</div></div>
                 </div>
             </div>
         </div>
-        <div class="pc-row2"></div>
-        <div class="pc-row3"></div>`;
-    
-    // Cache element references for fast updates
-    const refs = {
-        el: card,
-        status: card.querySelector('.pc-status'),
-        money: card.querySelector('.pc-money'),
-        healthBar: card.querySelector('.pc-bar-fill.health'),
-        healthVal: card.querySelectorAll('.pc-bar-value')[0],
-        armorIcon: card.querySelectorAll('.pc-bar-icon img')[1],
-        armorBar: card.querySelector('.pc-bar-fill.armor'),
-        armorVal: card.querySelectorAll('.pc-bar-value')[1],
-        weaponRow: card.querySelector('.pc-row2'),
-        utilRow: card.querySelector('.pc-row3'),
-        // Track last values to skip unchanged
-        last: {}
-    };
-    
-    return refs;
+        <div class="pc-row2">${weaponHtml}</div>
+        <div class="pc-row3">${defuser}</div>
+    </div>`;
 }
 
-function updateCard(refs, p, isLocal) {
-    const last = refs.last;
-    
-    // Only update what changed
-    if (last.alive !== p.alive) {
-        refs.el.classList.toggle('dead', !p.alive);
-        refs.status.className = 'pc-status ' + (p.alive ? 'alive' : 'dead');
-        last.alive = p.alive;
-    }
-    
-    if (last.isLocal !== isLocal) {
-        refs.el.classList.toggle('local', isLocal);
-        last.isLocal = isLocal;
-    }
-    
-    if (last.money !== p.money) {
-        refs.money.textContent = '$' + (p.money || 0).toLocaleString();
-        last.money = p.money;
-    }
-    
-    if (last.health !== p.health) {
-        refs.healthBar.style.width = (p.health || 0) + '%';
-        refs.healthVal.textContent = p.health || 0;
-        last.health = p.health;
-    }
-    
-    if (last.armor !== p.armor || last.armorType !== p.armor_type) {
-        refs.armorBar.style.width = (p.armor || 0) + '%';
-        refs.armorVal.textContent = p.armor || 0;
-        refs.armorIcon.src = '/icons/' + (p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar') + '.svg';
-        last.armor = p.armor;
-        last.armorType = p.armor_type;
-    }
-    
-    if (last.weapon !== p.weapon) {
-        if (p.weapon && p.alive) {
-            refs.weaponRow.innerHTML = `<div class="pc-weapon active"><img src="/icons/${p.weapon.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
-        } else {
-            refs.weaponRow.innerHTML = '';
-        }
-        last.weapon = p.weapon;
-    }
-    
-    if (last.hasDefuser !== p.has_defuser) {
-        refs.utilRow.innerHTML = p.has_defuser ? `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>` : '';
-        last.hasDefuser = p.has_defuser;
-    }
-}
-
-function updateUI() {
+function updateTeamPanels() {
     if (!radarData) return;
     
-    const tPanel = document.getElementById('t-players');
-    const ctPanel = document.getElementById('ct-players');
+    const tPlayers = [];
+    const ctPlayers = [];
     
-    // Collect all players
-    const allPlayers = [];
     if (radarData.local_player) {
-        allPlayers.push({ p: radarData.local_player, isLocal: true });
+        const lp = radarData.local_player;
+        if (lp.team === 2) tPlayers.push({ p: lp, local: true });
+        else if (lp.team === 3) ctPlayers.push({ p: lp, local: true });
     }
+    
     if (radarData.players) {
         for (const p of radarData.players) {
-            allPlayers.push({ p, isLocal: false });
+            if (p.team === 2) tPlayers.push({ p, local: false });
+            else if (p.team === 3) ctPlayers.push({ p, local: false });
         }
     }
     
-    // Track which players we've seen this update
-    const seenNames = new Set();
+    // Sort: alive first
+    const sortFn = (a, b) => (a.p.alive === b.p.alive ? 0 : (a.p.alive ? -1 : 1));
+    tPlayers.sort(sortFn);
+    ctPlayers.sort(sortFn);
     
-    for (const { p, isLocal } of allPlayers) {
-        const name = p.name || 'Unknown';
-        seenNames.add(name);
-        
-        let refs = playerCards.get(name);
-        
-        // Create card if doesn't exist
-        if (!refs) {
-            refs = createCard(name, p.team);
-            playerCards.set(name, refs);
-            
-            // Add to correct panel
-            if (p.team === 2) {
-                tPanel.appendChild(refs.el);
-            } else if (p.team === 3) {
-                ctPanel.appendChild(refs.el);
-            }
-        }
-        
-        // Update only changed values
-        updateCard(refs, p, isLocal);
-    }
-    
-    // Remove players who left
-    for (const [name, refs] of playerCards) {
-        if (!seenNames.has(name)) {
-            refs.el.remove();
-            playerCards.delete(name);
-        }
-    }
-    
-    // Bomb indicator
+    document.getElementById('t-players').innerHTML = tPlayers.map(x => buildCard(x.p, x.local)).join('');
+    document.getElementById('ct-players').innerHTML = ctPlayers.map(x => buildCard(x.p, x.local)).join('');
+}
+
+function updateBomb() {
     const bombEl = document.getElementById('bomb-indicator');
-    if (radarData.bomb) {
+    if (radarData?.bomb) {
         bombEl.style.display = 'block';
         bombEl.classList.toggle('defusing', radarData.bomb.defusing);
         document.getElementById('bomb-site').textContent = radarData.bomb.defusing ? 'DEFUSING' : 'SITE ' + radarData.bomb.site;
@@ -515,6 +427,10 @@ function render() {
             ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
         }
     }
+    
+    // Update DOM (like their code does)
+    updateTeamPanels();
+    updateBomb();
 }
 
 function renderLoop() { render(); requestAnimationFrame(renderLoop); }
