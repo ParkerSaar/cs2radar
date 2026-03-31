@@ -3,129 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CS2 Web Radar</title>
+<title>Cloud Radar</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;height:100vh;width:100vw;user-select:none;}
-#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px;background:radial-gradient(ellipse at center,#12101a 0%,#0a0a0f 70%);}
-#login-screen h1{font-size:28px;color:#00d4ff;letter-spacing:3px;text-transform:uppercase;}
-#login-screen .subtitle{color:#666;font-size:14px;margin-top:-12px;}
-#login-screen input{background:#16161e;border:2px solid #2a2a3a;color:#fff;padding:14px 24px;font-size:24px;text-align:center;letter-spacing:8px;text-transform:uppercase;border-radius:8px;outline:none;width:280px;transition:border-color 0.3s;}
-#login-screen input:focus{border-color:#00d4ff;}
-#login-screen input::placeholder{letter-spacing:2px;font-size:16px;color:#444;}
-#login-screen button{background:linear-gradient(135deg,#00d4ff,#0099cc);color:#fff;border:none;padding:12px 48px;font-size:16px;border-radius:8px;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:2px;}
-#login-screen button:hover{background:linear-gradient(135deg,#00e5ff,#00aadd);transform:translateY(-1px);}
-#login-screen .error{color:#ff4444;font-size:14px;min-height:20px;}
-#radar-screen{display:none;width:100vw;height:100vh;position:relative;}
-#radar-canvas{display:block;cursor:grab;}
-#radar-canvas:active{cursor:grabbing;}
-#top-bar{position:absolute;top:0;left:0;right:0;height:44px;background:rgba(12,12,18,0.95);border-bottom:1px solid #1e1e2e;display:flex;align-items:center;padding:0 16px;gap:12px;z-index:100;backdrop-filter:blur(10px);}
-#top-bar .divider{width:1px;height:22px;background:#2a2a3a;}
-#top-bar .status{font-size:12px;display:flex;align-items:center;gap:6px;}
-#top-bar .status .dot{width:8px;height:8px;border-radius:50%;background:#ff4444;}
-#top-bar .status .dot.connected{background:#44ff44;box-shadow:0 0 6px #44ff4466;}
-#top-bar .info{font-size:12px;color:#666;}
-#top-bar .code-display{font-size:13px;color:#00d4ff;font-family:'Consolas',monospace;letter-spacing:2px;}
-.spacer{flex:1;}
-.team-panel{position:absolute;top:44px;width:280px;bottom:40px;background:rgba(12,12,18,0.95);border:1px solid #1e1e2e;overflow-y:auto;z-index:100;backdrop-filter:blur(10px);padding:0;}
-#t-panel{left:0;border-right:1px solid #1e1e2e;}
-#ct-panel{right:0;border-left:1px solid #1e1e2e;}
-.team-header{padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:2px;border-bottom:1px solid #1e1e2e;font-weight:700;display:flex;align-items:center;gap:8px;}
-#t-panel .team-header{color:#e8943a;background:rgba(232,148,58,0.08);}
-#ct-panel .team-header{color:#5b9bd5;background:rgba(91,155,213,0.08);}
-.team-header .team-money{font-size:11px;color:#888;margin-left:auto;font-weight:400;}
-.player-card{padding:8px 10px;border-bottom:1px solid #141420;transition:background 0.2s;cursor:pointer;position:relative;}
-.player-card:hover{background:rgba(255,255,255,0.03);}
-.player-card.dead{opacity:0.4;}
-.pc-row1{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-.pc-name{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.pc-money{font-size:11px;color:#6a4;font-family:'Consolas',monospace;}
-.pc-row2{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
-.pc-hp-bar{flex:1;height:4px;background:#1a1a24;border-radius:2px;overflow:hidden;}
-.pc-hp-fill{height:100%;border-radius:2px;transition:width 0.3s;}
-.pc-armor-icon{font-size:11px;flex-shrink:0;}
-#options-bar{position:absolute;bottom:0;left:280px;right:280px;height:40px;background:rgba(12,12,18,0.95);border-top:1px solid #1e1e2e;display:flex;align-items:center;padding:0 16px;gap:16px;z-index:100;backdrop-filter:blur(10px);overflow-x:auto;}
-.opt-group{display:flex;align-items:center;gap:6px;white-space:nowrap;}
-.opt-group label{font-size:11px;color:#888;cursor:pointer;}
-.opt-group input[type="checkbox"]{accent-color:#00d4ff;width:13px;height:13px;cursor:pointer;}
-.opt-group select{background:#16161e;border:1px solid #2a2a3a;color:#ccc;padding:2px 6px;font-size:11px;border-radius:3px;outline:none;cursor:pointer;}
-#bomb-panel{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(15,10,10,0.95);border:2px solid #ff3333;border-radius:10px;padding:12px 24px;z-index:200;display:none;text-align:center;min-width:200px;box-shadow:0 0 30px rgba(255,0,0,0.3);animation:bomb-pulse 1s infinite;}
-@keyframes bomb-pulse{0%,100%{box-shadow:0 0 20px rgba(255,0,0,0.2);}50%{box-shadow:0 0 40px rgba(255,0,0,0.5);}}
-.bomb-title{font-size:16px;font-weight:700;color:#ff4444;letter-spacing:2px;}
-.bomb-site{font-size:24px;font-weight:700;color:#fff;margin:4px 0;}
-.bomb-timer{font-size:32px;font-weight:700;font-family:'Consolas',monospace;}
-.bomb-bar{width:100%;height:6px;background:#2a1515;border-radius:3px;margin-top:8px;overflow:hidden;}
-.bomb-bar-fill{height:100%;border-radius:3px;transition:width 0.2s;}
-#level-indicator{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(12,12,18,0.9);border:1px solid #00d4ff;border-radius:6px;padding:4px 16px;z-index:150;display:none;font-size:12px;font-weight:700;color:#00d4ff;letter-spacing:2px;}
-#zoom-controls{position:absolute;bottom:50px;left:290px;display:flex;flex-direction:column;gap:4px;z-index:100;}
-.zoom-btn{background:rgba(12,12,18,0.9);border:1px solid #2a2a3a;color:#aaa;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.zoom-btn:hover{border-color:#00d4ff;color:#fff;}
-.notification{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(20,20,30,0.95);border:1px solid #00d4ff;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
-.notification.show{opacity:1;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:2px;}
-@media(max-width:700px){.team-panel{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;height:35vh;border:none;border-top:1px solid #1e1e2e;}#t-panel{height:35vh;z-index:101;}#ct-panel{display:none;}#options-bar{display:none;}#zoom-controls{left:10px;bottom:calc(35vh + 10px);}.zoom-btn{width:40px;height:40px;font-size:20px;}}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; user-select: none; }
+
+/* LOGIN */
+#login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; background: linear-gradient(135deg, #0d0d12 0%, #1a1a24 100%); }
+#login-screen h1 { font-size: 32px; color: #fff; letter-spacing: 4px; font-weight: 300; }
+#login-screen h1 span { color: #4ade80; }
+#login-screen input { background: #1a1a24; border: 1px solid #2a2a3a; color: #fff; padding: 16px 32px; font-size: 24px; text-align: center; letter-spacing: 8px; text-transform: uppercase; border-radius: 8px; outline: none; width: 300px; }
+#login-screen input:focus { border-color: #4ade80; }
+#login-screen button { background: #4ade80; color: #000; border: none; padding: 14px 48px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; letter-spacing: 1px; transition: all 0.2s; }
+#login-screen button:hover { background: #22c55e; transform: scale(1.02); }
+#login-screen .error { color: #ff4444; font-size: 14px; min-height: 20px; }
+#login-screen .status { color: #888; font-size: 12px; margin-top: 20px; }
+
+/* MAIN LAYOUT */
+#radar-screen { display: none; width: 100vw; height: 100vh; background: #0d0d12; }
+.main-container { display: flex; height: 100vh; }
+
+/* TEAM PANELS */
+.team-panel { width: 280px; background: #111116; display: flex; flex-direction: column; overflow: hidden; }
+.team-panel.ct-side { border-left: 1px solid #1e1e28; }
+.team-panel.t-side { border-right: 1px solid #1e1e28; }
+.team-header { padding: 12px 16px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #1e1e28; }
+.t-side .team-header { color: #e8943a; }
+.ct-side .team-header { color: #5b9bd5; }
+.players-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+/* PLAYER CARD */
+.player-card { background: #16161c; border-radius: 6px; padding: 10px; margin-bottom: 6px; position: relative; transition: all 0.15s; }
+.player-card.dead { opacity: 0.35; }
+.player-card.local { background: #1a2420; border: 1px solid #4ade8040; }
+
+.pc-row1 { display: flex; align-items: flex-start; gap: 10px; }
+.pc-avatar { width: 56px; height: 56px; border-radius: 4px; background: #222; overflow: hidden; flex-shrink: 0; position: relative; }
+.pc-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pc-status { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; }
+.pc-status.alive { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+.pc-status.dead { background: #666; }
+.pc-status.flashed { background: #fff; box-shadow: 0 0 8px #fff; animation: flash-pulse 0.5s infinite; }
+@keyframes flash-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.pc-info { flex: 1; min-width: 0; }
+.pc-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-side .pc-name { color: #e8943a; }
+.ct-side .pc-name { color: #5b9bd5; }
+
+.pc-money { font-size: 13px; color: #4ade80; font-weight: 600; margin-bottom: 6px; }
+.pc-money::before { content: '$'; }
+
+.pc-bars { display: flex; flex-direction: column; gap: 3px; }
+.pc-bar { display: flex; align-items: center; gap: 6px; }
+.pc-bar-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.pc-bar-icon img { width: 100%; height: 100%; filter: brightness(0) invert(1); opacity: 0.7; }
+.pc-bar-track { flex: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
+.pc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.2s; }
+.pc-bar-fill.health { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.pc-bar-fill.armor { background: linear-gradient(90deg, #3b82f6, #5b9bd5); }
+.pc-bar-value { font-size: 11px; width: 24px; text-align: right; color: #888; }
+
+.pc-row2 { display: flex; gap: 3px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #222; flex-wrap: wrap; }
+.pc-weapon { height: 20px; background: #1a1a22; border-radius: 3px; display: flex; align-items: center; justify-content: center; padding: 2px 6px; }
+.pc-weapon.active { background: #2a3a2e; border: 1px solid #4ade8060; }
+.pc-weapon img { height: 100%; width: auto; max-width: 48px; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.85; }
+
+.pc-row3 { display: flex; gap: 3px; margin-top: 4px; }
+.pc-util { width: 18px; height: 18px; background: #1a1a22; border-radius: 3px; display: flex; align-items: center; justify-content: center; padding: 2px; }
+.pc-util img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.7; }
+.pc-util.defuser img { filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(180deg); }
+
+/* CENTER - MAP */
+.map-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.map-header { height: 44px; background: #111116; border-bottom: 1px solid #1e1e28; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
+.map-left { display: flex; align-items: center; gap: 16px; }
+.map-logo { font-size: 14px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; }
+.map-logo svg { width: 20px; height: 20px; fill: #4ade80; }
+.map-score { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.map-score .t-score { color: #e8943a; }
+.map-score .ct-score { color: #5b9bd5; }
+
+.map-center { display: flex; align-items: center; gap: 12px; }
+.map-name { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; background: #1a1a24; padding: 5px 10px; border-radius: 4px; }
+
+.map-right { display: flex; align-items: center; gap: 8px; }
+.map-btn { background: #1a1a24; border: 1px solid #2a2a3a; color: #888; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 5px; transition: all 0.15s; }
+.map-btn:hover { border-color: #4ade80; color: #fff; }
+.map-btn.active { background: #4ade80; color: #000; border-color: #4ade80; }
+.map-select { background: #1a1a24; border: 1px solid #2a2a3a; color: #ccc; padding: 5px 8px; border-radius: 4px; font-size: 11px; outline: none; cursor: pointer; }
+
+.map-area { flex: 1; position: relative; overflow: hidden; background: #0a0a10; }
+#radar-canvas { width: 100%; height: 100%; cursor: grab; display: block; }
+#radar-canvas:active { cursor: grabbing; }
+.map-label { position: absolute; top: 10px; left: 12px; font-size: 10px; color: #333; font-family: monospace; pointer-events: none; }
+
+/* BOMB */
+#bomb-indicator { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 10px 24px; border-radius: 6px; display: none; text-align: center; z-index: 100; box-shadow: 0 4px 20px rgba(220,38,38,0.4); }
+#bomb-indicator .site { font-size: 12px; font-weight: 600; color: #fca5a5; letter-spacing: 2px; }
+#bomb-indicator .timer { font-size: 28px; font-weight: 700; font-family: 'Consolas', monospace; color: #fff; }
+#bomb-indicator.defusing { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 20px rgba(37,99,235,0.4); }
+#bomb-indicator.defusing .site { color: #93c5fd; }
+
+/* STATUS */
+.notification { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1a1a24; border: 1px solid #4ade80; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 12px; z-index: 9999; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.notification.show { opacity: 1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
 </style>
 </head>
 <body>
+
 <div id="login-screen">
-    <h1>CS2 Radar</h1>
-    <p class="subtitle">Enter your session code</p>
+    <h1>Cloud <span>Radar</span></h1>
     <input type="text" id="code-input" placeholder="CODE" maxlength="6" autocomplete="off" spellcheck="false">
-    <button onclick="doLogin()">Connect</button>
+    <button onclick="doLogin()">CONNECT</button>
     <div class="error" id="login-error"></div>
+    <div class="status">Enter the code shown in your game console</div>
 </div>
+
 <div id="radar-screen">
-    <canvas id="radar-canvas"></canvas>
-    <div id="top-bar">
-        <span style="font-weight:700;color:#00d4ff;font-size:14px;">CS2 RADAR</span>
-        <div class="divider"></div>
-        <div class="status"><div class="dot" id="status-dot"></div><span id="status-text">Disconnected</span></div>
-        <div class="divider"></div>
-        <div class="code-display" id="code-display"></div>
-        <div class="divider"></div>
-        <div class="info" id="map-display">Map: --</div>
-        <div class="spacer"></div>
-        <div class="info" id="update-rate"></div>
-    </div>
-    <div class="team-panel" id="t-panel">
-        <div class="team-header"><span>TERRORISTS</span><span class="team-money" id="t-total-money">$0</span></div>
-        <div id="t-players"></div>
-    </div>
-    <div class="team-panel" id="ct-panel">
-        <div class="team-header"><span>COUNTER-TERRORISTS</span><span class="team-money" id="ct-total-money">$0</span></div>
-        <div id="ct-players"></div>
-    </div>
-    <div id="options-bar">
-        <div class="opt-group"><label>Mode:</label><select id="opt-mode"><option value="centered">Centered</option><option value="static">Static</option></select></div>
-        <div class="opt-group"><input type="checkbox" id="opt-rotate" checked><label for="opt-rotate">Rotate</label></div>
-        <div class="opt-group"><input type="checkbox" id="opt-names" checked><label for="opt-names">Names</label></div>
-        <div class="opt-group"><input type="checkbox" id="opt-hp-ring" checked><label for="opt-hp-ring">HP Ring</label></div>
-    </div>
-    <div id="bomb-panel">
-        <div class="bomb-title">BOMB PLANTED</div>
-        <div class="bomb-site" id="bomb-site">A</div>
-        <div class="bomb-timer" id="bomb-timer">40.0</div>
-        <div class="bomb-bar"><div class="bomb-bar-fill" id="bomb-bar-fill"></div></div>
-    </div>
-    <div id="level-indicator"></div>
-    <div id="zoom-controls">
-        <div class="zoom-btn" onclick="zoomIn()">+</div>
-        <div class="zoom-btn" onclick="zoomOut()">-</div>
-        <div class="zoom-btn" onclick="resetView()">R</div>
+    <div class="main-container">
+        <!-- T SIDE -->
+        <div class="team-panel t-side">
+            <div class="team-header">Terrorists</div>
+            <div class="players-list" id="t-players"></div>
+        </div>
+
+        <!-- MAP -->
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-left">
+                    <div class="map-logo">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3"/></svg>
+                        Cloud Radar
+                    </div>
+                    <div class="map-score">
+                        <span class="t-score" id="t-score">0</span>
+                        <span style="color:#444">:</span>
+                        <span class="ct-score" id="ct-score">0</span>
+                    </div>
+                </div>
+                <div class="map-center">
+                    <span class="map-name" id="map-name">WAITING</span>
+                </div>
+                <div class="map-right">
+                    <button class="map-btn active" id="btn-map" onclick="setView('map')">🗺 Map View</button>
+                    <button class="map-btn" id="btn-player" onclick="setView('player')">👤 Player View</button>
+                    <select class="map-select" id="follow-select" onchange="setFollow(this.value)">
+                        <option value="">Local Player</option>
+                    </select>
+                    <button class="map-btn" onclick="resetView()">↺</button>
+                    <button class="map-btn" onclick="goBack()">← BACK</button>
+                </div>
+            </div>
+            <div class="map-area">
+                <canvas id="radar-canvas"></canvas>
+                <div class="map-label" id="map-label"></div>
+                <div id="bomb-indicator">
+                    <div class="site" id="bomb-site">BOMB PLANTED</div>
+                    <div class="timer" id="bomb-timer">40.0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CT SIDE -->
+        <div class="team-panel ct-side">
+            <div class="team-header">Counter-Terrorists</div>
+            <div class="players-list" id="ct-players"></div>
+        </div>
     </div>
     <div class="notification" id="notification"></div>
 </div>
-<script>
-// =====================================================================
-// CONFIG - CHANGE THIS TO YOUR CLOUDFLARE WORKER URL
-// =====================================================================
-const WORKER_URL = 'funny-cobra-88.parkersaar.deno.net';
-// =====================================================================
 
+<script>
+const WORKER_URL = 'funny-cobra-88.parkersaar.deno.net';
 const WS_URL = 'wss://' + WORKER_URL + '/ws/';
-const RECONNECT_DELAY = 3000;
 
 const MAP_DATA = {
     de_dust2: { pos_x: -2476, pos_y: 3239, scale: 4.4 },
@@ -133,53 +189,45 @@ const MAP_DATA = {
     de_inferno: { pos_x: -2087, pos_y: 3870, scale: 4.9 },
     de_anubis: { pos_x: -2796, pos_y: 3328, scale: 5.22 },
     de_ancient: { pos_x: -2953, pos_y: 2164, scale: 5.0 },
-    de_nuke: { pos_x: -3453, pos_y: 2887, scale: 7.0, levels: ['default', 'lower'], z_split: -495 },
-    de_vertigo: { pos_x: -3168, pos_y: 1762, scale: 4.0, levels: ['default', 'lower'], z_split: 11700 },
+    de_nuke: { pos_x: -3453, pos_y: 2887, scale: 7.0 },
+    de_vertigo: { pos_x: -3168, pos_y: 1762, scale: 4.0 },
     de_overpass: { pos_x: -4831, pos_y: 1781, scale: 5.2 },
     de_train: { pos_x: -2477, pos_y: 2392, scale: 4.7 },
     cs_office: { pos_x: -1838, pos_y: 1858, scale: 4.1 },
     cs_italy: { pos_x: -2647, pos_y: 2592, scale: 4.6 },
 };
 
-const C = { local: '#44ff44', t: '#e8943a', ct: '#5b9bd5', t_dead: '#8b5e25', ct_dead: '#3a6a8f' };
-let ws = null, sessionCode = '', radarData = null, lastDataTime = 0;
-let updateCount = 0, lastCountReset = Date.now();
-let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragSX = 0, dragSY = 0, dragCX = 0, dragCY = 0;
-let canvas, ctx, W, H, currentMap = '', mapImages = {};
+// Character mappings
+const CT_CHARS = ['ctm_st6','ctm_st6_varianta','ctm_st6_variantb','ctm_st6_variantc','ctm_st6_variantd','ctm_fbi','ctm_fbi_varianta','ctm_sas','ctm_swat_variante','ctm_gendarmerie_varianta'];
+const T_CHARS = ['tm_phoenix','tm_phoenix_varianta','tm_phoenix_variantb','tm_balkan_varianta','tm_balkan_variantb','tm_leet_variantf','tm_anarchist','tm_professional_varf','tm_jungle_raider_varianta'];
 
-function notify(msg) { const el = document.getElementById('notification'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
-function escapeHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function teamColor(t, dead) { if (dead) return t === 2 ? C.t_dead : C.ct_dead; return t === 2 ? C.t : t === 3 ? C.ct : '#888'; }
+const GRENADES = ['flashbang','hegrenade','smokegrenade','molotov','incgrenade','decoy'];
+const PISTOLS = ['glock','usp_silencer','hkp2000','p2000','p250','fiveseven','tec9','cz75a','deagle','revolver','elite'];
+const KNIVES = ['knife','knife_t','bayonet','knife_karambit','knife_m9_bayonet','knife_butterfly','knife_flip','knife_gut','knife_tactical','knife_falchion','knife_survival_bowie','knife_bowie','knife_ursus','knife_stiletto','knife_gypsy_jackknife','knife_widowmaker','knife_skeleton','knife_outdoor','knife_cord','knife_canis','knife_push','knife_css','knife_kukri','knife_twinblade'];
+
+let ws = null, sessionCode = '', radarData = null;
+let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragStartX = 0, dragStartY = 0, dragCamX = 0, dragCamY = 0;
+let canvas, ctx, W, H, currentMap = '', mapImages = {}, mapImg = null;
+let viewMode = 'map', followTarget = '';
+
+function notify(msg) {
+    const el = document.getElementById('notification');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function loadMap(name) {
     if (!name || name === currentMap) return;
     currentMap = name;
-    document.getElementById('map-display').textContent = 'Map: ' + name;
-    mapImages = {};
-    const md = MAP_DATA[name];
-    if (!md) return;
-    if (md.levels) {
-        for (const lv of md.levels) {
-            const img = new Image();
-            const fname = lv === 'default' ? name : name + '_lower';
-            img.onload = () => { mapImages[name + '_' + lv] = img; };
-            img.src = '/data/' + fname + '/radar.png';
-        }
-    } else {
-        const img = new Image();
-        img.onload = () => { mapImages[name] = img; };
-        img.src = '/data/' + name + '/radar.png';
-    }
-}
-
-function getMapImage() {
-    const md = MAP_DATA[currentMap];
-    if (!md) return null;
-    if (md.levels) {
-        const lv = (radarData && radarData.level) || 'default';
-        return mapImages[currentMap + '_' + lv] || null;
-    }
-    return mapImages[currentMap] || null;
+    document.getElementById('map-name').textContent = name.toUpperCase().replace(/_/g, ' ');
+    document.getElementById('map-label').textContent = '//' + name;
+    mapImg = null;
+    const img = new Image();
+    img.onload = () => { mapImg = img; };
+    img.src = '/data/' + name + '/radar.png';
 }
 
 function worldToRadar(wx, wy) {
@@ -189,191 +237,315 @@ function worldToRadar(wx, wy) {
 }
 
 function radarToScreen(rx, ry) {
-    const mode = document.getElementById('opt-mode').value;
-    const rotate = document.getElementById('opt-rotate').checked;
-    if (mode === 'centered' && radarData && radarData.local_player) {
-        const lp = radarData.local_player;
+    if (viewMode === 'player' && radarData?.local_player) {
+        const lp = followTarget ? findPlayer(followTarget) : radarData.local_player;
+        if (!lp) return [W/2, H/2];
         const [lrx, lry] = worldToRadar(lp.x, lp.y);
         let dx = rx - lrx, dy = ry - lry;
-        if (rotate && lp.yaw !== undefined) {
-            const a = -(lp.yaw - 90) * Math.PI / 180;
-            dx = (rx - lrx) * Math.cos(a) - (ry - lry) * Math.sin(a);
-            dy = (rx - lrx) * Math.sin(a) + (ry - lry) * Math.cos(a);
-        }
-        return [W / 2 + dx * zoom + camX, H / 2 + dy * zoom + camY];
+        const a = -(lp.yaw - 90) * Math.PI / 180;
+        const nx = dx * Math.cos(a) - dy * Math.sin(a);
+        const ny = dx * Math.sin(a) + dy * Math.cos(a);
+        return [W/2 + nx * zoom + camX, H/2 + ny * zoom + camY];
     }
-    return [rx * zoom + camX + W / 2 - 512 * zoom, ry * zoom + camY + 44];
+    return [rx * zoom + camX + W/2 - 512*zoom, ry * zoom + camY + 50];
 }
 
-function w2s(wx, wy) { const [rx, ry] = worldToRadar(wx, wy); return radarToScreen(rx, ry); }
+function w2s(wx, wy) {
+    const [rx, ry] = worldToRadar(wx, wy);
+    return radarToScreen(rx, ry);
+}
 
+function findPlayer(name) {
+    if (!radarData) return null;
+    if (radarData.local_player?.name === name) return radarData.local_player;
+    return radarData.players?.find(p => p.name === name);
+}
+
+function setView(mode) {
+    viewMode = mode;
+    document.getElementById('btn-map').classList.toggle('active', mode === 'map');
+    document.getElementById('btn-player').classList.toggle('active', mode === 'player');
+    resetView();
+}
+
+function setFollow(name) { followTarget = name; }
+function resetView() { camX = 0; camY = 0; zoom = 1.0; }
+function goBack() { sessionCode = ''; if (ws) ws.close(); location.reload(); }
+
+// LOGIN
 function doLogin() {
     const code = document.getElementById('code-input').value.trim().toUpperCase();
-    if (code.length < 4) { document.getElementById('login-error').textContent = 'Code too short'; return; }
+    if (code.length < 4) { document.getElementById('login-error').textContent = 'Enter the code from your game'; return; }
     sessionCode = code;
     document.getElementById('login-error').textContent = 'Connecting...';
     connectWS();
 }
 document.getElementById('code-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
+// WS
 function connectWS() {
-    if (ws && ws.readyState <= 1) ws.close();
+    if (ws?.readyState <= 1) ws.close();
     ws = new WebSocket(WS_URL);
-    ws.onopen = () => { ws.send(JSON.stringify({ type: 'browser_auth', code: sessionCode })); };
+    ws.onopen = () => ws.send(JSON.stringify({ type: 'browser_auth', code: sessionCode }));
     ws.onmessage = e => {
-        let msg; try { msg = JSON.parse(e.data); } catch (x) { return; }
-        if (msg.type === 'auth_ok') { showRadar(); setStatus(true, 'Connected'); notify('Connected'); }
+        let msg; try { msg = JSON.parse(e.data); } catch { return; }
+        if (msg.type === 'auth_ok') { showRadar(); notify('Connected'); }
         else if (msg.type === 'error') { document.getElementById('login-error').textContent = msg.msg || 'Error'; }
-        else if (msg.type === 'radar_data') { radarData = msg.data; lastDataTime = Date.now(); updateCount++; if (msg.data.map && msg.data.map !== currentMap) loadMap(msg.data.map); }
-        else if (msg.type === 'lua_disconnected') { setStatus(false, 'Game disconnected'); notify('Game disconnected'); }
-        else if (msg.type === 'lua_connected') { setStatus(true, 'Live'); notify('Game connected'); }
+        else if (msg.type === 'radar_data') {
+            radarData = msg.data;
+            if (msg.data?.map && msg.data.map !== currentMap) loadMap(msg.data.map);
+            updateUI();
+        }
+        else if (msg.type === 'lua_disconnected') notify('Game disconnected');
+        else if (msg.type === 'lua_connected') notify('Game connected');
     };
-    ws.onclose = () => { setStatus(false, 'Disconnected'); if (sessionCode) setTimeout(connectWS, RECONNECT_DELAY); };
+    ws.onclose = () => { if (sessionCode) setTimeout(connectWS, 3000); };
 }
 
-function setStatus(on, t) { document.getElementById('status-dot').className = 'dot' + (on ? ' connected' : ''); document.getElementById('status-text').textContent = t; }
 function showRadar() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('radar-screen').style.display = 'block';
-    document.getElementById('code-display').textContent = sessionCode;
     initCanvas();
     requestAnimationFrame(renderLoop);
 }
 
+// CANVAS
 function initCanvas() {
-    canvas = document.getElementById('radar-canvas'); ctx = canvas.getContext('2d');
-    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-    canvas.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; dragSX = e.clientX; dragSY = e.clientY; dragCX = camX; dragCY = camY; } });
-    window.addEventListener('mousemove', e => { if (dragging) { camX = dragCX + (e.clientX - dragSX); camY = dragCY + (e.clientY - dragSY); } });
-    window.addEventListener('mouseup', () => { dragging = false; });
-    canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.1, Math.min(10, zoom * (e.deltaY < 0 ? 1.12 : 0.89))); });
-    canvas.addEventListener('dblclick', () => { camX = 0; camY = 0; });
-}
-function resizeCanvas() { W = window.innerWidth; H = window.innerHeight; canvas.width = W; canvas.height = H; }
-function zoomIn() { zoom = Math.min(10, zoom * 1.2); }
-function zoomOut() { zoom = Math.max(0.1, zoom * 0.83); }
-function resetView() { camX = 0; camY = 0; zoom = 1.0; }
-
-function drawHPRing(cx, cy, r, hp) {
-    if (!document.getElementById('opt-hp-ring').checked) return;
-    let col = hp > 66 ? '#44ff44' : hp > 33 ? '#ffcc00' : '#ff3333';
-    ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(40,40,40,0.6)'; ctx.lineWidth = 2.5; ctx.stroke();
-    const sa = -Math.PI / 2, ea = sa + Math.PI * 2 * (hp / 100);
-    ctx.beginPath(); ctx.arc(cx, cy, r + 3, sa, ea); ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke();
+    canvas = document.getElementById('radar-canvas');
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; dragStartX = e.clientX; dragStartY = e.clientY; dragCamX = camX; dragCamY = camY; }});
+    window.addEventListener('mousemove', e => { if (dragging) { camX = dragCamX + (e.clientX - dragStartX); camY = dragCamY + (e.clientY - dragStartY); }});
+    window.addEventListener('mouseup', () => dragging = false);
+    canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.3, Math.min(6, zoom * (e.deltaY < 0 ? 1.12 : 0.89))); });
+    canvas.addEventListener('dblclick', resetView);
 }
 
+function resize() {
+    const r = canvas.parentElement.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = W; canvas.height = H;
+}
+
+// Categorize weapon
+function getWeaponType(w) {
+    if (!w) return null;
+    w = w.toLowerCase();
+    if (GRENADES.includes(w)) return 'grenade';
+    if (PISTOLS.includes(w)) return 'pistol';
+    if (KNIVES.some(k => w.includes(k))) return 'knife';
+    return 'primary';
+}
+
+// Get character image for team
+function getCharImg(team, idx) {
+    const chars = team === 2 ? T_CHARS : CT_CHARS;
+    return '/characters/' + chars[idx % chars.length] + '.png';
+}
+
+// Build player card HTML
+function buildCard(p, idx, isLocal) {
+    const dead = !p.alive;
+    const flashed = p.flash > 0.5;
+    
+    // Parse weapons into categories
+    let primary = '', secondary = '', knife = '', grenades = [];
+    if (p.weapons && Array.isArray(p.weapons)) {
+        for (const w of p.weapons) {
+            const t = getWeaponType(w);
+            if (t === 'grenade') grenades.push(w);
+            else if (t === 'pistol' && !secondary) secondary = w;
+            else if (t === 'knife' && !knife) knife = w;
+            else if (t === 'primary' && !primary) primary = w;
+        }
+    } else if (p.weapon) {
+        // Fallback: single weapon field
+        const t = getWeaponType(p.weapon);
+        if (t === 'grenade') grenades.push(p.weapon);
+        else if (t === 'pistol') secondary = p.weapon;
+        else if (t === 'knife') knife = p.weapon;
+        else primary = p.weapon;
+    }
+    
+    // Active weapon highlight
+    const activeWeapon = p.weapon?.toLowerCase() || '';
+    
+    let weaponsHtml = '';
+    if (primary) weaponsHtml += `<div class="pc-weapon${activeWeapon===primary.toLowerCase()?' active':''}"><img src="/icons/${primary.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
+    if (secondary) weaponsHtml += `<div class="pc-weapon${activeWeapon===secondary.toLowerCase()?' active':''}"><img src="/icons/${secondary.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
+    if (knife) weaponsHtml += `<div class="pc-weapon${activeWeapon.includes('knife')?' active':''}"><img src="/icons/${knife.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
+    
+    let utilHtml = '';
+    for (const g of grenades) {
+        utilHtml += `<div class="pc-util"><img src="/icons/${g.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
+    }
+    if (p.has_defuser) {
+        utilHtml += `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
+    }
+    
+    const armorIcon = p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar';
+    
+    return `
+    <div class="player-card${dead?' dead':''}${isLocal?' local':''}">
+        <div class="pc-row1">
+            <div class="pc-avatar">
+                <img src="${getCharImg(p.team, idx)}" onerror="this.src='${getCharImg(p.team, 0)}'">
+                <div class="pc-status ${dead?'dead':(flashed?'flashed':'alive')}"></div>
+            </div>
+            <div class="pc-info">
+                <div class="pc-name">${esc(p.name || 'Unknown')}</div>
+                <div class="pc-money">${(p.money||0).toLocaleString()}</div>
+                <div class="pc-bars">
+                    <div class="pc-bar">
+                        <div class="pc-bar-icon"><img src="/icons/health.svg"></div>
+                        <div class="pc-bar-track"><div class="pc-bar-fill health" style="width:${p.health||0}%"></div></div>
+                        <div class="pc-bar-value">${p.health||0}</div>
+                    </div>
+                    <div class="pc-bar">
+                        <div class="pc-bar-icon"><img src="/icons/${armorIcon}.svg"></div>
+                        <div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:${p.armor||0}%"></div></div>
+                        <div class="pc-bar-value">${p.armor||0}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        ${weaponsHtml ? `<div class="pc-row2">${weaponsHtml}</div>` : ''}
+        ${utilHtml ? `<div class="pc-row3">${utilHtml}</div>` : ''}
+    </div>`;
+}
+
+function updateUI() {
+    if (!radarData) return;
+    
+    const tList = [], ctList = [];
+    let tIdx = 0, ctIdx = 0;
+    
+    // Add local player first
+    if (radarData.local_player) {
+        const lp = { ...radarData.local_player, isLocal: true };
+        if (lp.team === 2) { tList.push({ p: lp, idx: tIdx++, local: true }); }
+        else if (lp.team === 3) { ctList.push({ p: lp, idx: ctIdx++, local: true }); }
+    }
+    
+    // Add other players
+    if (radarData.players) {
+        for (const p of radarData.players) {
+            if (p.team === 2) tList.push({ p, idx: tIdx++, local: false });
+            else if (p.team === 3) ctList.push({ p, idx: ctIdx++, local: false });
+        }
+    }
+    
+    // Sort: alive first
+    const sortFn = (a, b) => (a.p.alive === b.p.alive ? 0 : (a.p.alive ? -1 : 1));
+    tList.sort(sortFn);
+    ctList.sort(sortFn);
+    
+    document.getElementById('t-players').innerHTML = tList.map(x => buildCard(x.p, x.idx, x.local)).join('');
+    document.getElementById('ct-players').innerHTML = ctList.map(x => buildCard(x.p, x.idx, x.local)).join('');
+    
+    // Update follow select
+    const sel = document.getElementById('follow-select');
+    const cur = sel.value;
+    let opts = '<option value="">Local Player</option>';
+    const all = [...tList, ...ctList].filter(x => x.p.alive);
+    for (const x of all) { opts += `<option value="${esc(x.p.name)}">${esc(x.p.name)}</option>`; }
+    sel.innerHTML = opts;
+    sel.value = cur;
+    
+    // Bomb indicator
+    const bombEl = document.getElementById('bomb-indicator');
+    if (radarData.bomb) {
+        bombEl.style.display = 'block';
+        bombEl.classList.toggle('defusing', radarData.bomb.defusing);
+        document.getElementById('bomb-site').textContent = radarData.bomb.defusing ? 'DEFUSING' : 'SITE ' + radarData.bomb.site;
+    } else {
+        bombEl.style.display = 'none';
+    }
+}
+
+// DRAW
 function drawPlayer(p, isLocal) {
     const [sx, sy] = w2s(p.x, p.y);
-    if (sx < -50 || sx > W + 50 || sy < -50 || sy > H + 50) return;
-    const showN = document.getElementById('opt-names').checked;
-    const tc = isLocal ? C.local : teamColor(p.team, !p.alive);
-    const dotR = isLocal ? 10 : 7;
-
+    if (sx < -50 || sx > W+50 || sy < -50 || sy > H+50) return;
+    
+    const c = isLocal ? '#4ade80' : (p.team === 2 ? (p.alive ? '#e8943a' : '#8b5e25') : (p.alive ? '#5b9bd5' : '#3a6a8f'));
+    const r = isLocal ? 10 : 8;
+    
     if (!p.alive) {
-        ctx.strokeStyle = tc; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(sx - 6, sy - 6); ctx.lineTo(sx + 6, sy + 6); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sx + 6, sy - 6); ctx.lineTo(sx - 6, sy + 6); ctx.stroke();
-        if (showN) { ctx.fillStyle = '#555'; ctx.font = '10px Segoe UI'; ctx.textAlign = 'center'; ctx.fillText(p.name || '', sx, sy - 12); }
+        ctx.strokeStyle = c; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx-5, sy-5); ctx.lineTo(sx+5, sy+5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx+5, sy-5); ctx.lineTo(sx-5, sy+5); ctx.stroke();
         return;
     }
-
+    
     // Direction
     if (p.yaw !== undefined) {
-        const mode = document.getElementById('opt-mode').value;
-        const rotate = document.getElementById('opt-rotate').checked;
-        let displayYaw = p.yaw;
-        if (mode === 'centered' && rotate && radarData && radarData.local_player) displayYaw = p.yaw - radarData.local_player.yaw;
-        const a = -displayYaw * Math.PI / 180;
-        const ll = isLocal ? 35 : 25;
-        ctx.strokeStyle = tc; ctx.lineWidth = isLocal ? 2.5 : 1.5; ctx.globalAlpha = 0.6;
-        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.cos(a) * ll, sy + Math.sin(a) * ll); ctx.stroke();
+        let yaw = p.yaw;
+        if (viewMode === 'player' && radarData?.local_player) {
+            const follow = followTarget ? findPlayer(followTarget) : radarData.local_player;
+            if (follow) yaw = p.yaw - follow.yaw;
+        }
+        const a = -yaw * Math.PI / 180;
+        ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.cos(a)*25, sy + Math.sin(a)*25); ctx.stroke();
         ctx.globalAlpha = 1;
     }
-
-    drawHPRing(sx, sy, dotR, p.health || 100);
-    if (isLocal) { ctx.fillStyle = tc; ctx.globalAlpha = 0.15; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
-    ctx.fillStyle = tc; ctx.beginPath(); ctx.arc(sx, sy, dotR, 0, Math.PI * 2); ctx.fill();
+    
+    // Dot
+    ctx.fillStyle = c;
+    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
-    if (showN) { ctx.fillStyle = tc; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center'; ctx.fillText(p.name || '', sx, sy - dotR - 8); }
+    
+    // Name
+    ctx.fillStyle = c; ctx.font = 'bold 10px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillText(p.name || '', sx, sy - r - 4);
 }
 
-function drawMapBg() {
-    const img = getMapImage();
-    if (img) {
-        const sz = 1024;
-        const [x0, y0] = radarToScreen(0, 0);
-        const [x1, y1] = radarToScreen(sz, sz);
-        ctx.globalAlpha = 0.5; ctx.drawImage(img, x0, y0, x1 - x0, y1 - y0); ctx.globalAlpha = 1;
-    }
-    const md = MAP_DATA[currentMap];
-    if (md && md.levels) {
-        const lv = (radarData && radarData.level) || 'default';
-        const el = document.getElementById('level-indicator');
-        el.textContent = lv === 'default' ? 'UPPER' : 'LOWER';
-        el.style.display = 'block';
-    } else {
-        document.getElementById('level-indicator').style.display = 'none';
-    }
-}
-
-function updateTeamPanels() {
-    if (!radarData) return;
-    const tP = [], ctP = [];
-    const all = [...(radarData.players || [])];
-    if (radarData.local_player) all.push({ ...radarData.local_player, isLocal: true });
-    for (const p of all) { if (p.team === 2) tP.push(p); else if (p.team === 3) ctP.push(p); }
-    renderPanel('t-players', tP, C.t);
-    renderPanel('ct-players', ctP, C.ct);
-    document.getElementById('t-total-money').textContent = '$' + tP.reduce((s, p) => s + (p.money || 0), 0).toLocaleString();
-    document.getElementById('ct-total-money').textContent = '$' + ctP.reduce((s, p) => s + (p.money || 0), 0).toLocaleString();
-}
-
-function renderPanel(id, players, color) {
-    const el = document.getElementById(id);
-    players.sort((a, b) => { if (a.alive !== b.alive) return a.alive ? -1 : 1; return (a.name || '').localeCompare(b.name || ''); });
-    let html = '';
-    for (const p of players) {
-        const dead = p.alive ? '' : ' dead';
-        let hpC = '#44ff44'; if ((p.health || 0) <= 33) hpC = '#ff3333'; else if ((p.health || 0) <= 66) hpC = '#ffcc00';
-        let armorI = p.armor_type === 2 ? '🛡H' : p.armor_type === 1 ? '🛡' : '';
-        let defI = p.has_defuser ? '🔧' : '';
-        html += '<div class="player-card' + dead + '"><div class="pc-row1"><div class="pc-name" style="color:' + (p.isLocal ? C.local : color) + '">' + escapeHtml(p.name || 'Unknown') + '</div><div class="pc-money">$' + (p.money || 0).toLocaleString() + '</div><span class="pc-armor-icon">' + armorI + defI + '</span></div><div class="pc-row2"><div class="pc-hp-bar"><div class="pc-hp-fill" style="width:' + (p.health || 0) + '%;background:' + hpC + '"></div></div></div></div>';
-    }
-    el.innerHTML = html;
-}
-
-function updateBomb() {
-    const panel = document.getElementById('bomb-panel');
-    if (!radarData || !radarData.bomb) { panel.style.display = 'none'; return; }
+function drawBomb() {
+    if (!radarData?.bomb) return;
     const b = radarData.bomb;
-    panel.style.display = 'block';
-    document.getElementById('bomb-site').textContent = 'SITE ' + b.site;
     const [bx, by] = w2s(b.x, b.y);
-    if (bx > -50 && bx < W + 50 && by > -50 && by < H + 50) {
-        ctx.fillStyle = 'rgba(255,50,50,0.4)'; ctx.beginPath(); ctx.arc(bx, by, 15, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ff3333'; ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
-    }
+    if (bx < -50 || bx > W+50 || by < -50 || by > H+50) return;
+    
+    // Glow
+    ctx.fillStyle = 'rgba(255,60,60,0.3)';
+    ctx.beginPath(); ctx.arc(bx, by, 14, 0, Math.PI*2); ctx.fill();
+    // Dot
+    ctx.fillStyle = '#ff3333';
+    ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
 }
-
-function renderLoop() { render(); requestAnimationFrame(renderLoop); }
 
 function render() {
     if (!ctx) return;
-    const now = Date.now();
-    if (now - lastCountReset > 1000) { document.getElementById('update-rate').textContent = updateCount + ' upd/s'; updateCount = 0; lastCountReset = now; }
-    const stale = now - lastDataTime > 3000;
-    if (stale && lastDataTime > 0) setStatus(false, 'No data');
-    else if (lastDataTime > 0) setStatus(true, 'Live');
-
-    ctx.fillStyle = '#0d0d14'; ctx.fillRect(0, 0, W, H);
-    drawMapBg();
-    if (!radarData) { ctx.fillStyle = '#333'; ctx.font = '16px Segoe UI'; ctx.textAlign = 'center'; ctx.fillText('Waiting for data...', W / 2, H / 2); return; }
-    if (radarData.players) for (const p of radarData.players) drawPlayer(p, false);
+    ctx.fillStyle = '#0a0a10';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Map
+    if (mapImg) {
+        const [x0, y0] = radarToScreen(0, 0);
+        const [x1, y1] = radarToScreen(1024, 1024);
+        ctx.globalAlpha = 0.55;
+        ctx.drawImage(mapImg, x0, y0, x1-x0, y1-y0);
+        ctx.globalAlpha = 1;
+    }
+    
+    if (!radarData) {
+        ctx.fillStyle = '#444'; ctx.font = '14px Segoe UI'; ctx.textAlign = 'center';
+        ctx.fillText('Waiting for game data...', W/2, H/2);
+        return;
+    }
+    
+    // Players
+    if (radarData.players) {
+        for (const p of radarData.players) drawPlayer(p, false);
+    }
     if (radarData.local_player) drawPlayer(radarData.local_player, true);
-    updateBomb();
-    updateTeamPanels();
+    
+    drawBomb();
 }
+
+function renderLoop() { render(); requestAnimationFrame(renderLoop); }
 </script>
 </body>
 </html>
