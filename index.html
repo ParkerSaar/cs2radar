@@ -168,8 +168,8 @@ const MAP_DATA = {
     cs_italy: { pos_x: -2647, pos_y: 2592, scale: 4.6 },
 };
 
-const CT_CHARS = ['ctm_st6','ctm_st6_varianta','ctm_st6_variantb','ctm_fbi','ctm_fbi_varianta','ctm_sas','ctm_swat_variante','ctm_gendarmerie_varianta'];
-const T_CHARS = ['tm_phoenix','tm_phoenix_varianta','tm_balkan_varianta','tm_balkan_variantb','tm_leet_variantf','tm_anarchist','tm_professional_varf'];
+const CT_CHAR = 'ctm_sas';
+const T_CHAR = 'tm_phoenix';
 const GRENADES = ['flashbang','hegrenade','smokegrenade','molotov','incgrenade','decoy'];
 const PISTOLS = ['glock','usp_silencer','hkp2000','p2000','p250','fiveseven','tec9','cz75a','deagle','revolver','elite'];
 
@@ -275,10 +275,13 @@ function resize() {
     canvas.width = W; canvas.height = H;
 }
 
-// THROTTLED UI UPDATE - DISABLED FOR TESTING
+// THROTTLED UI UPDATE - only update DOM every 2 seconds
 function scheduleUIUpdate() {
-    // Skip all DOM updates to test performance
-    return;
+    if (uiUpdateTimer) return;
+    uiUpdateTimer = setTimeout(() => {
+        uiUpdateTimer = null;
+        updateUI();
+    }, 2000);
 }
 
 function getWeaponType(w) {
@@ -290,37 +293,27 @@ function getWeaponType(w) {
     return 'primary';
 }
 
-function getChar(team, idx) {
-    const chars = team === 2 ? T_CHARS : CT_CHARS;
-    return '/characters/' + chars[idx % chars.length] + '.png';
+function getChar(team) {
+    return '/characters/' + (team === 2 ? T_CHAR : CT_CHAR) + '.png';
 }
 
 function buildCard(p, idx, isLocal) {
-    let primary = '', secondary = '', knife = '', grenades = [];
-    const weapons = p.weapons || (p.weapon ? [p.weapon] : []);
-    for (const w of weapons) {
-        const t = getWeaponType(w);
-        if (t === 'grenade') grenades.push(w);
-        else if (t === 'pistol' && !secondary) secondary = w;
-        else if (t === 'knife' && !knife) knife = w;
-        else if (t === 'primary' && !primary) primary = w;
-    }
-    const active = (p.weapon || '').toLowerCase();
+    const weapon = p.weapon || '';
+    const wType = getWeaponType(weapon);
     
     let wHtml = '';
-    if (primary) wHtml += `<div class="pc-weapon${active===primary.toLowerCase()?' active':''}"><img src="/icons/${primary.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
-    if (secondary) wHtml += `<div class="pc-weapon${active===secondary.toLowerCase()?' active':''}"><img src="/icons/${secondary.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
-    if (knife) wHtml += `<div class="pc-weapon${active.includes('knife')?' active':''}"><img src="/icons/${knife.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+    if (weapon && wType !== 'grenade') {
+        wHtml = `<div class="pc-weapon active"><img src="/icons/${weapon.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+    }
     
     let uHtml = '';
-    for (const g of grenades) uHtml += `<div class="pc-util"><img src="/icons/${g.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
-    if (p.has_defuser) uHtml += `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
+    if (p.has_defuser) uHtml = `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
     
     const armorIcon = p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar';
     
     return `<div class="player-card${p.alive?'':' dead'}${isLocal?' local':''}">
         <div class="pc-row1">
-            <div class="pc-avatar"><img src="${getChar(p.team, idx)}" onerror="this.src='${getChar(p.team,0)}'"><div class="pc-status ${p.alive?'alive':'dead'}"></div></div>
+            <div class="pc-avatar"><img src="${getChar(p.team)}"><div class="pc-status ${p.alive?'alive':'dead'}"></div></div>
             <div class="pc-info">
                 <div class="pc-name">${esc(p.name||'Unknown')}</div>
                 <div class="pc-money">$${(p.money||0).toLocaleString()}</div>
