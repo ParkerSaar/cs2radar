@@ -275,13 +275,10 @@ function resize() {
     canvas.width = W; canvas.height = H;
 }
 
-// THROTTLED UI UPDATE - only update DOM 1x per second max
+// THROTTLED UI UPDATE - DISABLED FOR TESTING
 function scheduleUIUpdate() {
-    if (uiUpdateTimer) return;
-    uiUpdateTimer = setTimeout(() => {
-        uiUpdateTimer = null;
-        updateUI();
-    }, 1000);
+    // Skip all DOM updates to test performance
+    return;
 }
 
 function getWeaponType(w) {
