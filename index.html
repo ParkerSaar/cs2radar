@@ -275,13 +275,13 @@ function resize() {
     canvas.width = W; canvas.height = H;
 }
 
-// THROTTLED UI UPDATE - only update DOM every 2 seconds
+// THROTTLED UI UPDATE - updates are cheap now, run every 500ms
 function scheduleUIUpdate() {
     if (uiUpdateTimer) return;
     uiUpdateTimer = setTimeout(() => {
         uiUpdateTimer = null;
         updateUI();
-    }, 2000);
+    }, 500);
 }
 
 function getWeaponType(w) {
@@ -297,69 +297,147 @@ function getChar(team) {
     return '/characters/' + (team === 2 ? T_CHAR : CT_CHAR) + '.png';
 }
 
-function buildCard(p, idx, isLocal) {
-    const weapon = p.weapon || '';
-    const wType = getWeaponType(weapon);
-    
-    let wHtml = '';
-    if (weapon && wType !== 'grenade') {
-        wHtml = `<div class="pc-weapon active"><img src="/icons/${weapon.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
-    }
-    
-    let uHtml = '';
-    if (p.has_defuser) uHtml = `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
-    
-    const armorIcon = p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar';
-    
-    return `<div class="player-card${p.alive?'':' dead'}${isLocal?' local':''}">
+// Store references to player card elements
+const playerCards = new Map(); // name -> {el, data}
+
+function createCard(name, team) {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.innerHTML = `
         <div class="pc-row1">
-            <div class="pc-avatar"><img src="${getChar(p.team)}"><div class="pc-status ${p.alive?'alive':'dead'}"></div></div>
+            <div class="pc-avatar"><img src="${getChar(team)}"><div class="pc-status alive"></div></div>
             <div class="pc-info">
-                <div class="pc-name">${esc(p.name||'Unknown')}</div>
-                <div class="pc-money">$${(p.money||0).toLocaleString()}</div>
+                <div class="pc-name">${esc(name)}</div>
+                <div class="pc-money">$0</div>
                 <div class="pc-bars">
-                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/health.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill health" style="width:${p.health||0}%"></div></div><div class="pc-bar-value">${p.health||0}</div></div>
-                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/${armorIcon}.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:${p.armor||0}%"></div></div><div class="pc-bar-value">${p.armor||0}</div></div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/health.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill health" style="width:100%"></div></div><div class="pc-bar-value">100</div></div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/kevlar.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:0%"></div></div><div class="pc-bar-value">0</div></div>
                 </div>
             </div>
         </div>
-        ${wHtml?`<div class="pc-row2">${wHtml}</div>`:''}
-        ${uHtml?`<div class="pc-row3">${uHtml}</div>`:''}
-    </div>`;
+        <div class="pc-row2"></div>
+        <div class="pc-row3"></div>`;
+    
+    // Cache element references for fast updates
+    const refs = {
+        el: card,
+        status: card.querySelector('.pc-status'),
+        money: card.querySelector('.pc-money'),
+        healthBar: card.querySelector('.pc-bar-fill.health'),
+        healthVal: card.querySelectorAll('.pc-bar-value')[0],
+        armorIcon: card.querySelectorAll('.pc-bar-icon img')[1],
+        armorBar: card.querySelector('.pc-bar-fill.armor'),
+        armorVal: card.querySelectorAll('.pc-bar-value')[1],
+        weaponRow: card.querySelector('.pc-row2'),
+        utilRow: card.querySelector('.pc-row3'),
+        // Track last values to skip unchanged
+        last: {}
+    };
+    
+    return refs;
+}
+
+function updateCard(refs, p, isLocal) {
+    const last = refs.last;
+    
+    // Only update what changed
+    if (last.alive !== p.alive) {
+        refs.el.classList.toggle('dead', !p.alive);
+        refs.status.className = 'pc-status ' + (p.alive ? 'alive' : 'dead');
+        last.alive = p.alive;
+    }
+    
+    if (last.isLocal !== isLocal) {
+        refs.el.classList.toggle('local', isLocal);
+        last.isLocal = isLocal;
+    }
+    
+    if (last.money !== p.money) {
+        refs.money.textContent = '$' + (p.money || 0).toLocaleString();
+        last.money = p.money;
+    }
+    
+    if (last.health !== p.health) {
+        refs.healthBar.style.width = (p.health || 0) + '%';
+        refs.healthVal.textContent = p.health || 0;
+        last.health = p.health;
+    }
+    
+    if (last.armor !== p.armor || last.armorType !== p.armor_type) {
+        refs.armorBar.style.width = (p.armor || 0) + '%';
+        refs.armorVal.textContent = p.armor || 0;
+        refs.armorIcon.src = '/icons/' + (p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar') + '.svg';
+        last.armor = p.armor;
+        last.armorType = p.armor_type;
+    }
+    
+    if (last.weapon !== p.weapon) {
+        if (p.weapon && p.alive) {
+            refs.weaponRow.innerHTML = `<div class="pc-weapon active"><img src="/icons/${p.weapon.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+        } else {
+            refs.weaponRow.innerHTML = '';
+        }
+        last.weapon = p.weapon;
+    }
+    
+    if (last.hasDefuser !== p.has_defuser) {
+        refs.utilRow.innerHTML = p.has_defuser ? `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>` : '';
+        last.hasDefuser = p.has_defuser;
+    }
 }
 
 function updateUI() {
     if (!radarData) return;
     
-    const tList = [], ctList = [];
-    let ti = 0, ci = 0;
+    const tPanel = document.getElementById('t-players');
+    const ctPanel = document.getElementById('ct-players');
     
+    // Collect all players
+    const allPlayers = [];
     if (radarData.local_player) {
-        if (radarData.local_player.team === 2) tList.push({ p: radarData.local_player, i: ti++, l: true });
-        else if (radarData.local_player.team === 3) ctList.push({ p: radarData.local_player, i: ci++, l: true });
+        allPlayers.push({ p: radarData.local_player, isLocal: true });
     }
     if (radarData.players) {
         for (const p of radarData.players) {
-            if (p.team === 2) tList.push({ p, i: ti++, l: false });
-            else if (p.team === 3) ctList.push({ p, i: ci++, l: false });
+            allPlayers.push({ p, isLocal: false });
         }
     }
     
-    tList.sort((a,b) => (a.p.alive===b.p.alive?0:(a.p.alive?-1:1)));
-    ctList.sort((a,b) => (a.p.alive===b.p.alive?0:(a.p.alive?-1:1)));
+    // Track which players we've seen this update
+    const seenNames = new Set();
     
-    document.getElementById('t-players').innerHTML = tList.map(x => buildCard(x.p, x.i, x.l)).join('');
-    document.getElementById('ct-players').innerHTML = ctList.map(x => buildCard(x.p, x.i, x.l)).join('');
+    for (const { p, isLocal } of allPlayers) {
+        const name = p.name || 'Unknown';
+        seenNames.add(name);
+        
+        let refs = playerCards.get(name);
+        
+        // Create card if doesn't exist
+        if (!refs) {
+            refs = createCard(name, p.team);
+            playerCards.set(name, refs);
+            
+            // Add to correct panel
+            if (p.team === 2) {
+                tPanel.appendChild(refs.el);
+            } else if (p.team === 3) {
+                ctPanel.appendChild(refs.el);
+            }
+        }
+        
+        // Update only changed values
+        updateCard(refs, p, isLocal);
+    }
     
-    // Follow select
-    const sel = document.getElementById('follow-select');
-    const cur = sel.value;
-    let opts = '<option value="">Local Player</option>';
-    for (const x of [...tList, ...ctList].filter(x => x.p.alive)) opts += `<option value="${esc(x.p.name)}">${esc(x.p.name)}</option>`;
-    sel.innerHTML = opts;
-    sel.value = cur;
+    // Remove players who left
+    for (const [name, refs] of playerCards) {
+        if (!seenNames.has(name)) {
+            refs.el.remove();
+            playerCards.delete(name);
+        }
+    }
     
-    // Bomb
+    // Bomb indicator
     const bombEl = document.getElementById('bomb-indicator');
     if (radarData.bomb) {
         bombEl.style.display = 'block';
