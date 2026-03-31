@@ -8,22 +8,19 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; user-select: none; }
 
-/* LOGIN */
 #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; background: linear-gradient(135deg, #0d0d12 0%, #1a1a24 100%); }
 #login-screen h1 { font-size: 32px; color: #fff; letter-spacing: 4px; font-weight: 300; }
 #login-screen h1 span { color: #4ade80; }
 #login-screen input { background: #1a1a24; border: 1px solid #2a2a3a; color: #fff; padding: 16px 32px; font-size: 24px; text-align: center; letter-spacing: 8px; text-transform: uppercase; border-radius: 8px; outline: none; width: 300px; }
 #login-screen input:focus { border-color: #4ade80; }
-#login-screen button { background: #4ade80; color: #000; border: none; padding: 14px 48px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; letter-spacing: 1px; transition: all 0.2s; }
-#login-screen button:hover { background: #22c55e; transform: scale(1.02); }
+#login-screen button { background: #4ade80; color: #000; border: none; padding: 14px 48px; font-size: 14px; border-radius: 8px; cursor: pointer; font-weight: 600; letter-spacing: 1px; }
+#login-screen button:hover { background: #22c55e; }
 #login-screen .error { color: #ff4444; font-size: 14px; min-height: 20px; }
 #login-screen .status { color: #888; font-size: 12px; margin-top: 20px; }
 
-/* MAIN LAYOUT */
 #radar-screen { display: none; width: 100vw; height: 100vh; background: #0d0d12; }
 .main-container { display: flex; height: 100vh; }
 
-/* TEAM PANELS */
 .team-panel { width: 280px; background: #111116; display: flex; flex-direction: column; overflow: hidden; }
 .team-panel.ct-side { border-left: 1px solid #1e1e28; }
 .team-panel.t-side { border-right: 1px solid #1e1e28; }
@@ -32,8 +29,7 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 .ct-side .team-header { color: #5b9bd5; }
 .players-list { flex: 1; overflow-y: auto; padding: 8px; }
 
-/* PLAYER CARD */
-.player-card { background: #16161c; border-radius: 6px; padding: 10px; margin-bottom: 6px; position: relative; transition: all 0.15s; }
+.player-card { background: #16161c; border-radius: 6px; padding: 10px; margin-bottom: 6px; position: relative; }
 .player-card.dead { opacity: 0.35; }
 .player-card.local { background: #1a2420; border: 1px solid #4ade8040; }
 
@@ -43,8 +39,6 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 .pc-status { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; }
 .pc-status.alive { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
 .pc-status.dead { background: #666; }
-.pc-status.flashed { background: #fff; box-shadow: 0 0 8px #fff; animation: flash-pulse 0.5s infinite; }
-@keyframes flash-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .pc-info { flex: 1; min-width: 0; }
 .pc-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -52,14 +46,13 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 .ct-side .pc-name { color: #5b9bd5; }
 
 .pc-money { font-size: 13px; color: #4ade80; font-weight: 600; margin-bottom: 6px; }
-.pc-money::before { content: '$'; }
 
 .pc-bars { display: flex; flex-direction: column; gap: 3px; }
 .pc-bar { display: flex; align-items: center; gap: 6px; }
 .pc-bar-icon { width: 14px; height: 14px; flex-shrink: 0; }
 .pc-bar-icon img { width: 100%; height: 100%; filter: brightness(0) invert(1); opacity: 0.7; }
 .pc-bar-track { flex: 1; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
-.pc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.2s; }
+.pc-bar-fill { height: 100%; border-radius: 2px; }
 .pc-bar-fill.health { background: linear-gradient(90deg, #22c55e, #4ade80); }
 .pc-bar-fill.armor { background: linear-gradient(90deg, #3b82f6, #5b9bd5); }
 .pc-bar-value { font-size: 11px; width: 24px; text-align: right; color: #888; }
@@ -74,7 +67,6 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 .pc-util img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.7; }
 .pc-util.defuser img { filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(180deg); }
 
-/* CENTER - MAP */
 .map-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .map-header { height: 44px; background: #111116; border-bottom: 1px solid #1e1e28; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; }
 .map-left { display: flex; align-items: center; gap: 16px; }
@@ -83,12 +75,10 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 .map-score { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .map-score .t-score { color: #e8943a; }
 .map-score .ct-score { color: #5b9bd5; }
-
 .map-center { display: flex; align-items: center; gap: 12px; }
 .map-name { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; background: #1a1a24; padding: 5px 10px; border-radius: 4px; }
-
 .map-right { display: flex; align-items: center; gap: 8px; }
-.map-btn { background: #1a1a24; border: 1px solid #2a2a3a; color: #888; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 5px; transition: all 0.15s; }
+.map-btn { background: #1a1a24; border: 1px solid #2a2a3a; color: #888; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 5px; }
 .map-btn:hover { border-color: #4ade80; color: #fff; }
 .map-btn.active { background: #4ade80; color: #000; border-color: #4ade80; }
 .map-select { background: #1a1a24; border: 1px solid #2a2a3a; color: #ccc; padding: 5px 8px; border-radius: 4px; font-size: 11px; outline: none; cursor: pointer; }
@@ -98,18 +88,15 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 #radar-canvas:active { cursor: grabbing; }
 .map-label { position: absolute; top: 10px; left: 12px; font-size: 10px; color: #333; font-family: monospace; pointer-events: none; }
 
-/* BOMB */
 #bomb-indicator { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #dc2626, #b91c1c); padding: 10px 24px; border-radius: 6px; display: none; text-align: center; z-index: 100; box-shadow: 0 4px 20px rgba(220,38,38,0.4); }
 #bomb-indicator .site { font-size: 12px; font-weight: 600; color: #fca5a5; letter-spacing: 2px; }
 #bomb-indicator .timer { font-size: 28px; font-weight: 700; font-family: 'Consolas', monospace; color: #fff; }
 #bomb-indicator.defusing { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 20px rgba(37,99,235,0.4); }
 #bomb-indicator.defusing .site { color: #93c5fd; }
 
-/* STATUS */
 .notification { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1a1a24; border: 1px solid #4ade80; color: #fff; padding: 10px 20px; border-radius: 6px; font-size: 12px; z-index: 9999; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
 .notification.show { opacity: 1; }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
@@ -127,13 +114,10 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
 
 <div id="radar-screen">
     <div class="main-container">
-        <!-- T SIDE -->
         <div class="team-panel t-side">
             <div class="team-header">Terrorists</div>
             <div class="players-list" id="t-players"></div>
         </div>
-
-        <!-- MAP -->
         <div class="map-container">
             <div class="map-header">
                 <div class="map-left">
@@ -141,36 +125,23 @@ body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3"/></svg>
                         Cloud Radar
                     </div>
-                    <div class="map-score">
-                        <span class="t-score" id="t-score">0</span>
-                        <span style="color:#444">:</span>
-                        <span class="ct-score" id="ct-score">0</span>
-                    </div>
+                    <div class="map-score"><span class="t-score" id="t-score">0</span><span style="color:#444"> : </span><span class="ct-score" id="ct-score">0</span></div>
                 </div>
-                <div class="map-center">
-                    <span class="map-name" id="map-name">WAITING</span>
-                </div>
+                <div class="map-center"><span class="map-name" id="map-name">WAITING</span></div>
                 <div class="map-right">
-                    <button class="map-btn active" id="btn-map" onclick="setView('map')">🗺 Map View</button>
-                    <button class="map-btn" id="btn-player" onclick="setView('player')">👤 Player View</button>
-                    <select class="map-select" id="follow-select" onchange="setFollow(this.value)">
-                        <option value="">Local Player</option>
-                    </select>
-                    <button class="map-btn" onclick="resetView()">↺</button>
-                    <button class="map-btn" onclick="goBack()">← BACK</button>
+                    <button class="map-btn active" id="btn-map" onclick="setView('map')">🗺 Map</button>
+                    <button class="map-btn" id="btn-player" onclick="setView('player')">👤 Player</button>
+                    <select class="map-select" id="follow-select" onchange="followTarget=this.value"></select>
+                    <button class="map-btn" onclick="camX=camY=0;zoom=1">↺</button>
+                    <button class="map-btn" onclick="location.reload()">← Back</button>
                 </div>
             </div>
             <div class="map-area">
                 <canvas id="radar-canvas"></canvas>
                 <div class="map-label" id="map-label"></div>
-                <div id="bomb-indicator">
-                    <div class="site" id="bomb-site">BOMB PLANTED</div>
-                    <div class="timer" id="bomb-timer">40.0</div>
-                </div>
+                <div id="bomb-indicator"><div class="site" id="bomb-site">BOMB</div><div class="timer" id="bomb-timer">40.0</div></div>
             </div>
         </div>
-
-        <!-- CT SIDE -->
         <div class="team-panel ct-side">
             <div class="team-header">Counter-Terrorists</div>
             <div class="players-list" id="ct-players"></div>
@@ -197,27 +168,19 @@ const MAP_DATA = {
     cs_italy: { pos_x: -2647, pos_y: 2592, scale: 4.6 },
 };
 
-// Character mappings
-const CT_CHARS = ['ctm_st6','ctm_st6_varianta','ctm_st6_variantb','ctm_st6_variantc','ctm_st6_variantd','ctm_fbi','ctm_fbi_varianta','ctm_sas','ctm_swat_variante','ctm_gendarmerie_varianta'];
-const T_CHARS = ['tm_phoenix','tm_phoenix_varianta','tm_phoenix_variantb','tm_balkan_varianta','tm_balkan_variantb','tm_leet_variantf','tm_anarchist','tm_professional_varf','tm_jungle_raider_varianta'];
-
+const CT_CHARS = ['ctm_st6','ctm_st6_varianta','ctm_st6_variantb','ctm_fbi','ctm_fbi_varianta','ctm_sas','ctm_swat_variante','ctm_gendarmerie_varianta'];
+const T_CHARS = ['tm_phoenix','tm_phoenix_varianta','tm_balkan_varianta','tm_balkan_variantb','tm_leet_variantf','tm_anarchist','tm_professional_varf'];
 const GRENADES = ['flashbang','hegrenade','smokegrenade','molotov','incgrenade','decoy'];
 const PISTOLS = ['glock','usp_silencer','hkp2000','p2000','p250','fiveseven','tec9','cz75a','deagle','revolver','elite'];
-const KNIVES = ['knife','knife_t','bayonet','knife_karambit','knife_m9_bayonet','knife_butterfly','knife_flip','knife_gut','knife_tactical','knife_falchion','knife_survival_bowie','knife_bowie','knife_ursus','knife_stiletto','knife_gypsy_jackknife','knife_widowmaker','knife_skeleton','knife_outdoor','knife_cord','knife_canis','knife_push','knife_css','knife_kukri','knife_twinblade'];
 
 let ws = null, sessionCode = '', radarData = null;
-let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragStartX = 0, dragStartY = 0, dragCamX = 0, dragCamY = 0;
-let canvas, ctx, W, H, currentMap = '', mapImages = {}, mapImg = null;
+let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragX = 0, dragY = 0, dcX = 0, dcY = 0;
+let canvas, ctx, W, H, currentMap = '', mapImg = null;
 let viewMode = 'map', followTarget = '';
+let lastUIHash = '', uiUpdateTimer = null;
 
-function notify(msg) {
-    const el = document.getElementById('notification');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2000);
-}
-
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function notify(msg) { const el = document.getElementById('notification'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
+function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function loadMap(name) {
     if (!name || name === currentMap) return;
@@ -230,52 +193,36 @@ function loadMap(name) {
     img.src = '/data/' + name + '/radar.png';
 }
 
-function worldToRadar(wx, wy) {
+function w2r(wx, wy) {
     const md = MAP_DATA[currentMap];
     if (!md) return [0, 0];
     return [(wx - md.pos_x) / md.scale, (md.pos_y - wy) / md.scale];
 }
 
-function radarToScreen(rx, ry) {
+function r2s(rx, ry) {
     if (viewMode === 'player' && radarData?.local_player) {
-        const lp = followTarget ? findPlayer(followTarget) : radarData.local_player;
-        if (!lp) return [W/2, H/2];
-        const [lrx, lry] = worldToRadar(lp.x, lp.y);
+        const lp = followTarget ? (radarData.players?.find(p=>p.name===followTarget) || radarData.local_player) : radarData.local_player;
+        const [lrx, lry] = w2r(lp.x, lp.y);
         let dx = rx - lrx, dy = ry - lry;
         const a = -(lp.yaw - 90) * Math.PI / 180;
-        const nx = dx * Math.cos(a) - dy * Math.sin(a);
-        const ny = dx * Math.sin(a) + dy * Math.cos(a);
-        return [W/2 + nx * zoom + camX, H/2 + ny * zoom + camY];
+        return [W/2 + (dx*Math.cos(a) - dy*Math.sin(a))*zoom + camX, H/2 + (dx*Math.sin(a) + dy*Math.cos(a))*zoom + camY];
     }
-    return [rx * zoom + camX + W/2 - 512*zoom, ry * zoom + camY + 50];
+    return [rx*zoom + camX + W/2 - 512*zoom, ry*zoom + camY + 50];
 }
 
-function w2s(wx, wy) {
-    const [rx, ry] = worldToRadar(wx, wy);
-    return radarToScreen(rx, ry);
-}
-
-function findPlayer(name) {
-    if (!radarData) return null;
-    if (radarData.local_player?.name === name) return radarData.local_player;
-    return radarData.players?.find(p => p.name === name);
-}
+function w2s(wx, wy) { const [rx, ry] = w2r(wx, wy); return r2s(rx, ry); }
 
 function setView(mode) {
     viewMode = mode;
     document.getElementById('btn-map').classList.toggle('active', mode === 'map');
     document.getElementById('btn-player').classList.toggle('active', mode === 'player');
-    resetView();
+    camX = camY = 0; zoom = 1;
 }
-
-function setFollow(name) { followTarget = name; }
-function resetView() { camX = 0; camY = 0; zoom = 1.0; }
-function goBack() { sessionCode = ''; if (ws) ws.close(); location.reload(); }
 
 // LOGIN
 function doLogin() {
     const code = document.getElementById('code-input').value.trim().toUpperCase();
-    if (code.length < 4) { document.getElementById('login-error').textContent = 'Enter the code from your game'; return; }
+    if (code.length < 4) { document.getElementById('login-error').textContent = 'Enter the code'; return; }
     sessionCode = code;
     document.getElementById('login-error').textContent = 'Connecting...';
     connectWS();
@@ -294,7 +241,7 @@ function connectWS() {
         else if (msg.type === 'radar_data') {
             radarData = msg.data;
             if (msg.data?.map && msg.data.map !== currentMap) loadMap(msg.data.map);
-            updateUI();
+            scheduleUIUpdate();
         }
         else if (msg.type === 'lua_disconnected') notify('Game disconnected');
         else if (msg.type === 'lua_connected') notify('Game connected');
@@ -315,11 +262,11 @@ function initCanvas() {
     ctx = canvas.getContext('2d');
     resize();
     window.addEventListener('resize', resize);
-    canvas.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; dragStartX = e.clientX; dragStartY = e.clientY; dragCamX = camX; dragCamY = camY; }});
-    window.addEventListener('mousemove', e => { if (dragging) { camX = dragCamX + (e.clientX - dragStartX); camY = dragCamY + (e.clientY - dragStartY); }});
+    canvas.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; dragX = e.clientX; dragY = e.clientY; dcX = camX; dcY = camY; }});
+    window.addEventListener('mousemove', e => { if (dragging) { camX = dcX + e.clientX - dragX; camY = dcY + e.clientY - dragY; }});
     window.addEventListener('mouseup', () => dragging = false);
     canvas.addEventListener('wheel', e => { e.preventDefault(); zoom = Math.max(0.3, Math.min(6, zoom * (e.deltaY < 0 ? 1.12 : 0.89))); });
-    canvas.addEventListener('dblclick', resetView);
+    canvas.addEventListener('dblclick', () => { camX = camY = 0; zoom = 1; });
 }
 
 function resize() {
@@ -328,132 +275,109 @@ function resize() {
     canvas.width = W; canvas.height = H;
 }
 
-// Categorize weapon
+// THROTTLED UI UPDATE - only update DOM 4x per second max
+function scheduleUIUpdate() {
+    if (uiUpdateTimer) return;
+    uiUpdateTimer = setTimeout(() => {
+        uiUpdateTimer = null;
+        updateUI();
+    }, 250);
+}
+
 function getWeaponType(w) {
     if (!w) return null;
     w = w.toLowerCase();
     if (GRENADES.includes(w)) return 'grenade';
     if (PISTOLS.includes(w)) return 'pistol';
-    if (KNIVES.some(k => w.includes(k))) return 'knife';
+    if (w.includes('knife') || w === 'bayonet') return 'knife';
     return 'primary';
 }
 
-// Get character image for team
-function getCharImg(team, idx) {
+function getChar(team, idx) {
     const chars = team === 2 ? T_CHARS : CT_CHARS;
     return '/characters/' + chars[idx % chars.length] + '.png';
 }
 
-// Build player card HTML
 function buildCard(p, idx, isLocal) {
-    const dead = !p.alive;
-    const flashed = p.flash > 0.5;
-    
-    // Parse weapons into categories
     let primary = '', secondary = '', knife = '', grenades = [];
-    if (p.weapons && Array.isArray(p.weapons)) {
-        for (const w of p.weapons) {
-            const t = getWeaponType(w);
-            if (t === 'grenade') grenades.push(w);
-            else if (t === 'pistol' && !secondary) secondary = w;
-            else if (t === 'knife' && !knife) knife = w;
-            else if (t === 'primary' && !primary) primary = w;
-        }
-    } else if (p.weapon) {
-        // Fallback: single weapon field
-        const t = getWeaponType(p.weapon);
-        if (t === 'grenade') grenades.push(p.weapon);
-        else if (t === 'pistol') secondary = p.weapon;
-        else if (t === 'knife') knife = p.weapon;
-        else primary = p.weapon;
+    const weapons = p.weapons || (p.weapon ? [p.weapon] : []);
+    for (const w of weapons) {
+        const t = getWeaponType(w);
+        if (t === 'grenade') grenades.push(w);
+        else if (t === 'pistol' && !secondary) secondary = w;
+        else if (t === 'knife' && !knife) knife = w;
+        else if (t === 'primary' && !primary) primary = w;
     }
+    const active = (p.weapon || '').toLowerCase();
     
-    // Active weapon highlight
-    const activeWeapon = p.weapon?.toLowerCase() || '';
+    let wHtml = '';
+    if (primary) wHtml += `<div class="pc-weapon${active===primary.toLowerCase()?' active':''}"><img src="/icons/${primary.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+    if (secondary) wHtml += `<div class="pc-weapon${active===secondary.toLowerCase()?' active':''}"><img src="/icons/${secondary.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+    if (knife) wHtml += `<div class="pc-weapon${active.includes('knife')?' active':''}"><img src="/icons/${knife.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
     
-    let weaponsHtml = '';
-    if (primary) weaponsHtml += `<div class="pc-weapon${activeWeapon===primary.toLowerCase()?' active':''}"><img src="/icons/${primary.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
-    if (secondary) weaponsHtml += `<div class="pc-weapon${activeWeapon===secondary.toLowerCase()?' active':''}"><img src="/icons/${secondary.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
-    if (knife) weaponsHtml += `<div class="pc-weapon${activeWeapon.includes('knife')?' active':''}"><img src="/icons/${knife.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
-    
-    let utilHtml = '';
-    for (const g of grenades) {
-        utilHtml += `<div class="pc-util"><img src="/icons/${g.toLowerCase()}.svg" onerror="this.style.display='none'"></div>`;
-    }
-    if (p.has_defuser) {
-        utilHtml += `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
-    }
+    let uHtml = '';
+    for (const g of grenades) uHtml += `<div class="pc-util"><img src="/icons/${g.toLowerCase()}.svg" onerror="this.parentElement.style.display='none'"></div>`;
+    if (p.has_defuser) uHtml += `<div class="pc-util defuser"><img src="/icons/defuser.svg"></div>`;
     
     const armorIcon = p.armor_type === 2 ? 'kevlar_helmet' : 'kevlar';
     
-    return `
-    <div class="player-card${dead?' dead':''}${isLocal?' local':''}">
+    return `<div class="player-card${p.alive?'':' dead'}${isLocal?' local':''}">
         <div class="pc-row1">
-            <div class="pc-avatar">
-                <img src="${getCharImg(p.team, idx)}" onerror="this.src='${getCharImg(p.team, 0)}'">
-                <div class="pc-status ${dead?'dead':(flashed?'flashed':'alive')}"></div>
-            </div>
+            <div class="pc-avatar"><img src="${getChar(p.team, idx)}" onerror="this.src='${getChar(p.team,0)}'"><div class="pc-status ${p.alive?'alive':'dead'}"></div></div>
             <div class="pc-info">
-                <div class="pc-name">${esc(p.name || 'Unknown')}</div>
-                <div class="pc-money">${(p.money||0).toLocaleString()}</div>
+                <div class="pc-name">${esc(p.name||'Unknown')}</div>
+                <div class="pc-money">$${(p.money||0).toLocaleString()}</div>
                 <div class="pc-bars">
-                    <div class="pc-bar">
-                        <div class="pc-bar-icon"><img src="/icons/health.svg"></div>
-                        <div class="pc-bar-track"><div class="pc-bar-fill health" style="width:${p.health||0}%"></div></div>
-                        <div class="pc-bar-value">${p.health||0}</div>
-                    </div>
-                    <div class="pc-bar">
-                        <div class="pc-bar-icon"><img src="/icons/${armorIcon}.svg"></div>
-                        <div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:${p.armor||0}%"></div></div>
-                        <div class="pc-bar-value">${p.armor||0}</div>
-                    </div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/health.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill health" style="width:${p.health||0}%"></div></div><div class="pc-bar-value">${p.health||0}</div></div>
+                    <div class="pc-bar"><div class="pc-bar-icon"><img src="/icons/${armorIcon}.svg"></div><div class="pc-bar-track"><div class="pc-bar-fill armor" style="width:${p.armor||0}%"></div></div><div class="pc-bar-value">${p.armor||0}</div></div>
                 </div>
             </div>
         </div>
-        ${weaponsHtml ? `<div class="pc-row2">${weaponsHtml}</div>` : ''}
-        ${utilHtml ? `<div class="pc-row3">${utilHtml}</div>` : ''}
+        ${wHtml?`<div class="pc-row2">${wHtml}</div>`:''}
+        ${uHtml?`<div class="pc-row3">${uHtml}</div>`:''}
     </div>`;
 }
 
 function updateUI() {
     if (!radarData) return;
     
+    // Create hash of important data to check if anything changed
+    const hash = JSON.stringify([
+        radarData.local_player?.health, radarData.local_player?.armor, radarData.local_player?.weapon, radarData.local_player?.money,
+        radarData.players?.map(p => [p.name, p.health, p.alive, p.weapon, p.money])
+    ]);
+    if (hash === lastUIHash) return;
+    lastUIHash = hash;
+    
     const tList = [], ctList = [];
-    let tIdx = 0, ctIdx = 0;
+    let ti = 0, ci = 0;
     
-    // Add local player first
     if (radarData.local_player) {
-        const lp = { ...radarData.local_player, isLocal: true };
-        if (lp.team === 2) { tList.push({ p: lp, idx: tIdx++, local: true }); }
-        else if (lp.team === 3) { ctList.push({ p: lp, idx: ctIdx++, local: true }); }
+        if (radarData.local_player.team === 2) tList.push({ p: radarData.local_player, i: ti++, l: true });
+        else if (radarData.local_player.team === 3) ctList.push({ p: radarData.local_player, i: ci++, l: true });
     }
-    
-    // Add other players
     if (radarData.players) {
         for (const p of radarData.players) {
-            if (p.team === 2) tList.push({ p, idx: tIdx++, local: false });
-            else if (p.team === 3) ctList.push({ p, idx: ctIdx++, local: false });
+            if (p.team === 2) tList.push({ p, i: ti++, l: false });
+            else if (p.team === 3) ctList.push({ p, i: ci++, l: false });
         }
     }
     
-    // Sort: alive first
-    const sortFn = (a, b) => (a.p.alive === b.p.alive ? 0 : (a.p.alive ? -1 : 1));
-    tList.sort(sortFn);
-    ctList.sort(sortFn);
+    tList.sort((a,b) => (a.p.alive===b.p.alive?0:(a.p.alive?-1:1)));
+    ctList.sort((a,b) => (a.p.alive===b.p.alive?0:(a.p.alive?-1:1)));
     
-    document.getElementById('t-players').innerHTML = tList.map(x => buildCard(x.p, x.idx, x.local)).join('');
-    document.getElementById('ct-players').innerHTML = ctList.map(x => buildCard(x.p, x.idx, x.local)).join('');
+    document.getElementById('t-players').innerHTML = tList.map(x => buildCard(x.p, x.i, x.l)).join('');
+    document.getElementById('ct-players').innerHTML = ctList.map(x => buildCard(x.p, x.i, x.l)).join('');
     
-    // Update follow select
+    // Follow select
     const sel = document.getElementById('follow-select');
     const cur = sel.value;
     let opts = '<option value="">Local Player</option>';
-    const all = [...tList, ...ctList].filter(x => x.p.alive);
-    for (const x of all) { opts += `<option value="${esc(x.p.name)}">${esc(x.p.name)}</option>`; }
+    for (const x of [...tList, ...ctList].filter(x => x.p.alive)) opts += `<option value="${esc(x.p.name)}">${esc(x.p.name)}</option>`;
     sel.innerHTML = opts;
     sel.value = cur;
     
-    // Bomb indicator
+    // Bomb
     const bombEl = document.getElementById('bomb-indicator');
     if (radarData.bomb) {
         bombEl.style.display = 'block';
@@ -464,13 +388,12 @@ function updateUI() {
     }
 }
 
-// DRAW
+// DRAW - runs every frame, but only touches canvas
 function drawPlayer(p, isLocal) {
     const [sx, sy] = w2s(p.x, p.y);
     if (sx < -50 || sx > W+50 || sy < -50 || sy > H+50) return;
     
     const c = isLocal ? '#4ade80' : (p.team === 2 ? (p.alive ? '#e8943a' : '#8b5e25') : (p.alive ? '#5b9bd5' : '#3a6a8f'));
-    const r = isLocal ? 10 : 8;
     
     if (!p.alive) {
         ctx.strokeStyle = c; ctx.lineWidth = 2;
@@ -483,8 +406,8 @@ function drawPlayer(p, isLocal) {
     if (p.yaw !== undefined) {
         let yaw = p.yaw;
         if (viewMode === 'player' && radarData?.local_player) {
-            const follow = followTarget ? findPlayer(followTarget) : radarData.local_player;
-            if (follow) yaw = p.yaw - follow.yaw;
+            const follow = followTarget ? (radarData.players?.find(x=>x.name===followTarget) || radarData.local_player) : radarData.local_player;
+            yaw = p.yaw - follow.yaw;
         }
         const a = -yaw * Math.PI / 180;
         ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
@@ -492,28 +415,12 @@ function drawPlayer(p, isLocal) {
         ctx.globalAlpha = 1;
     }
     
-    // Dot
     ctx.fillStyle = c;
-    ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(sx, sy, isLocal ? 10 : 8, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
     
-    // Name
     ctx.fillStyle = c; ctx.font = 'bold 10px Segoe UI'; ctx.textAlign = 'center';
-    ctx.fillText(p.name || '', sx, sy - r - 4);
-}
-
-function drawBomb() {
-    if (!radarData?.bomb) return;
-    const b = radarData.bomb;
-    const [bx, by] = w2s(b.x, b.y);
-    if (bx < -50 || bx > W+50 || by < -50 || by > H+50) return;
-    
-    // Glow
-    ctx.fillStyle = 'rgba(255,60,60,0.3)';
-    ctx.beginPath(); ctx.arc(bx, by, 14, 0, Math.PI*2); ctx.fill();
-    // Dot
-    ctx.fillStyle = '#ff3333';
-    ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillText(p.name || '', sx, sy - (isLocal ? 14 : 12));
 }
 
 function render() {
@@ -521,10 +428,9 @@ function render() {
     ctx.fillStyle = '#0a0a10';
     ctx.fillRect(0, 0, W, H);
     
-    // Map
     if (mapImg) {
-        const [x0, y0] = radarToScreen(0, 0);
-        const [x1, y1] = radarToScreen(1024, 1024);
+        const [x0, y0] = r2s(0, 0);
+        const [x1, y1] = r2s(1024, 1024);
         ctx.globalAlpha = 0.55;
         ctx.drawImage(mapImg, x0, y0, x1-x0, y1-y0);
         ctx.globalAlpha = 1;
@@ -536,13 +442,19 @@ function render() {
         return;
     }
     
-    // Players
-    if (radarData.players) {
-        for (const p of radarData.players) drawPlayer(p, false);
-    }
+    if (radarData.players) for (const p of radarData.players) drawPlayer(p, false);
     if (radarData.local_player) drawPlayer(radarData.local_player, true);
     
-    drawBomb();
+    // Bomb
+    if (radarData.bomb) {
+        const [bx, by] = w2s(radarData.bomb.x, radarData.bomb.y);
+        if (bx > -50 && bx < W+50 && by > -50 && by < H+50) {
+            ctx.fillStyle = 'rgba(255,60,60,0.3)';
+            ctx.beginPath(); ctx.arc(bx, by, 14, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ff3333';
+            ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
+        }
+    }
 }
 
 function renderLoop() { render(); requestAnimationFrame(renderLoop); }
