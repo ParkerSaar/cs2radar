@@ -177,7 +177,7 @@ let ws = null, sessionCode = '', radarData = null;
 let camX = 0, camY = 0, zoom = 1.0, dragging = false, dragX = 0, dragY = 0, dcX = 0, dcY = 0;
 let canvas, ctx, W, H, currentMap = '', mapImg = null;
 let viewMode = 'map', followTarget = '';
-let lastUIHash = '', uiUpdateTimer = null;
+let uiUpdateTimer = null;
 
 function notify(msg) { const el = document.getElementById('notification'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
 function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -275,13 +275,13 @@ function resize() {
     canvas.width = W; canvas.height = H;
 }
 
-// THROTTLED UI UPDATE - only update DOM 4x per second max
+// THROTTLED UI UPDATE - only update DOM 1x per second max
 function scheduleUIUpdate() {
     if (uiUpdateTimer) return;
     uiUpdateTimer = setTimeout(() => {
         uiUpdateTimer = null;
         updateUI();
-    }, 250);
+    }, 1000);
 }
 
 function getWeaponType(w) {
@@ -340,14 +340,6 @@ function buildCard(p, idx, isLocal) {
 
 function updateUI() {
     if (!radarData) return;
-    
-    // Create hash of important data to check if anything changed
-    const hash = JSON.stringify([
-        radarData.local_player?.health, radarData.local_player?.armor, radarData.local_player?.weapon, radarData.local_player?.money,
-        radarData.players?.map(p => [p.name, p.health, p.alive, p.weapon, p.money])
-    ]);
-    if (hash === lastUIHash) return;
-    lastUIHash = hash;
     
     const tList = [], ctList = [];
     let ti = 0, ci = 0;
